@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lab del Sueño · El Mito de las 8 Horas</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07080a;--l1:#0f1318;--l2:#151b24;--l3:#1c2433;
+  --rim:rgba(255,255,255,.06);--rim2:rgba(255,255,255,.11);--rim3:rgba(255,255,255,.18);
+  --muted:#4a5568;--sub:#6b7a99;--text:#b0bdd4;--bright:#d8e2f0;--white:#f0f5fc;
+  --c6:#f43f5e;--c6t:rgba(244,63,94,.1);--c6b:rgba(244,63,94,.28);
+  --c7:#f59e0b;--c7t:rgba(245,158,11,.1);--c7b:rgba(245,158,11,.28);
+  --c8:#06b6d4;--c8t:rgba(6,182,212,.1);--c8b:rgba(6,182,212,.28);
+  --acc:#818cf8;--ok:#10b981;
+  --r8:8px;--r12:12px;--r16:16px;--r20:20px;--r24:24px;
+  --serif:'Instrument Serif',Georgia,serif;
+  --sans:'Geist',system-ui,sans-serif;
+  --mono:'Geist Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--bg);scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+
+/* ── HERO ── */
+.hero{min-height:100svh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:4rem 1.5rem 3rem;position:relative;overflow:hidden}
+.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 80% 55% at 50% -5%,rgba(129,140,248,.1),transparent 65%);pointer-events:none}
+.sl{position:absolute;inset:0;pointer-events:none}
+.he{font-family:var(--mono);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:1.5rem;display:flex;align-items:center;gap:.75rem}
+.he::before,.he::after{content:'';flex:1;height:1px;background:var(--rim2);max-width:80px}
+.hh1{font-family:var(--serif);font-size:clamp(2rem,5.5vw,4.5rem);font-weight:400;line-height:1.08;color:var(--white);margin-bottom:1rem;max-width:720px}
+.hh1 em{font-style:italic;color:rgba(255,255,255,.32)}
+.hsub{font-size:clamp(.875rem,1.8vw,1.05rem);color:var(--sub);max-width:520px;line-height:1.8;margin-bottom:2.5rem}
+.hsub strong{color:var(--text);font-weight:500}
+.hcta{display:inline-flex;align-items:center;gap:.5rem;padding:.875rem 2rem;background:var(--acc);border:none;border-radius:var(--r12);color:white;font-family:var(--serif);font-style:italic;font-size:1.05rem;cursor:pointer;transition:all .2s}
+.hcta:hover{background:#6366f1;transform:translateY(-2px);box-shadow:0 8px 32px rgba(129,140,248,.35)}
+.star{position:absolute;border-radius:50%;background:#fff;animation:tw var(--d,3s) ease-in-out infinite;animation-delay:var(--dl,0s);opacity:0}
+@keyframes tw{0%,100%{opacity:0}50%{opacity:var(--o,.5)}}
+
+/* ── APP SHELL ── */
+#app{display:none}
+#app.show{display:block}
+.app-header{background:var(--l1);border-bottom:1px solid var(--rim);position:sticky;top:0;z-index:200}
+.app-header-inner{max-width:960px;margin:0 auto;padding:0 1.25rem;display:flex;align-items:center;justify-content:space-between;height:52px}
+.app-brand{font-family:var(--serif);font-size:.95rem;color:var(--bright);font-style:italic}
+.app-profile{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:.5rem;cursor:pointer;transition:color .15s}
+.app-profile:hover{color:var(--text)}
+
+/* ── SCORE HEADER ── */
+.score-header{background:var(--l1);border-bottom:1px solid var(--rim2);padding:1.125rem 0}
+.score-header-inner{max-width:960px;margin:0 auto;padding:0 1.25rem}
+/* Legend bar */
+.legend-bar{display:flex;align-items:center;justify-content:center;gap:1.75rem;margin-bottom:1rem;flex-wrap:wrap}
+.lb-item{display:flex;align-items:center;gap:.5rem;font-size:11px;color:var(--muted)}
+.lb-swatch{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+/* Score boxes */
+.score-boxes{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.875rem}
+.sbox{border-radius:var(--r16);border:1px solid;padding:1rem 1.125rem;position:relative}
+/* Score box header */
+.sbox-scenario{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.625rem;display:flex;align-items:center;gap:.375rem}
+.sbox-hrs-row{display:flex;align-items:baseline;gap:.5rem;margin-bottom:.375rem}
+.sbox-hrs{font-family:var(--serif);font-size:2rem;font-weight:400;line-height:1}
+.sbox-hrs-lbl{font-size:11px;color:var(--muted);line-height:1.4}
+.sbox-divider{height:1px;background:var(--rim);margin:.75rem 0}
+/* Score explanation */
+.sbox-score-row{display:flex;align-items:baseline;gap:.375rem;margin-bottom:.25rem}
+.sbox-score-num{font-family:var(--mono);font-size:1.35rem;font-weight:500;line-height:1}
+.sbox-score-denom{font-family:var(--mono);font-size:.75rem;color:var(--muted)}
+.sbox-score-lbl{font-size:11px;color:var(--muted);line-height:1.4;margin-bottom:.5rem}
+.sbox-grade{display:inline-flex;align-items:center;gap:.375rem;font-family:var(--mono);font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px}
+.sbox-band{font-family:var(--mono);font-size:9.5px;color:var(--muted);margin-top:.375rem}
+
+/* ── TABS ── */
+.tabs-bar{background:var(--l1);border-bottom:1px solid var(--rim);position:sticky;top:52px;z-index:190}
+.tabs-inner{max-width:960px;margin:0 auto;padding:0 1.25rem;display:flex;gap:0;overflow-x:auto;scrollbar-width:none}
+.tabs-inner::-webkit-scrollbar{display:none}
+.tab-btn{padding:.75rem 1.125rem;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;border:none;background:transparent;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;font-family:var(--sans);transition:all .12s}
+.tab-btn:hover{color:var(--text)}
+.tab-btn.on{color:var(--white);border-bottom-color:var(--acc);font-weight:600}
+
+/* ── TAB CONTENT ── */
+.tab-content{max-width:960px;margin:0 auto;padding:1.5rem 1.25rem}
+.tpanel{display:none}
+.tpanel.on{display:block}
+
+/* ── COMMON CARD ── */
+.card{background:var(--l1);border:1px solid var(--rim);border-radius:var(--r20);position:relative;overflow:hidden;margin-bottom:1rem}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--rim3),transparent);pointer-events:none}
+.cp{padding:1.25rem}
+
+/* Card header with explanation */
+.card-hd{margin-bottom:.875rem}
+.card-title{font-size:14px;font-weight:600;color:var(--bright);margin-bottom:.25rem}
+.card-what{font-size:12px;color:var(--sub);line-height:1.6;padding:.625rem .875rem;background:rgba(255,255,255,.03);border-radius:var(--r8);border-left:2px solid var(--acc);margin-bottom:.625rem}
+.card-tags{display:flex;gap:.375rem;flex-wrap:wrap}
+.tag{font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:3px;letter-spacing:.04em}
+.tev{background:rgba(6,182,212,.1);color:#67e8f9;border:1px solid rgba(6,182,212,.2)}
+.tma{background:rgba(245,158,11,.1);color:#fcd34d;border:1px solid rgba(245,158,11,.2)}
+
+canvas{display:block;width:100%}
+.cleg{display:flex;gap:1.25rem;margin-top:.875rem;flex-wrap:wrap}
+.cli{display:flex;align-items:center;gap:.375rem;font-size:11px;color:var(--sub)}
+.cll{width:18px;height:2px;border-radius:1px;flex-shrink:0}
+
+/* ── TAB 1: RESUMEN ── */
+.metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin-bottom:1rem}
+.mc{background:var(--l2);border:1px solid var(--rim);border-radius:var(--r12);padding:.875rem}
+.mc-title{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.25rem}
+.mc-desc{font-size:11px;color:var(--muted);line-height:1.45;margin-bottom:.75rem}
+.mc-bars{display:flex;flex-direction:column;gap:.4rem}
+.mb{display:flex;align-items:center;gap:.5rem}
+.mbh{font-family:var(--mono);font-size:10px;color:var(--muted);min-width:14px}
+.mbt{flex:1;height:5px;background:var(--l3);border-radius:3px;overflow:hidden}
+.mbf{height:100%;border-radius:3px;transition:width .55s cubic-bezier(.4,0,.2,1)}
+.mbv{font-family:var(--mono);font-size:10px;font-weight:500;min-width:26px;text-align:right}
+
+/* insight & verdict */
+.insight-card{background:var(--l2);border:1px solid var(--rim2);border-radius:var(--r20);padding:1.75rem;margin-bottom:1rem;position:relative;overflow:hidden}
+.insight-card::before{content:'\201C';position:absolute;top:-.5rem;left:1.25rem;font-family:var(--serif);font-size:5rem;color:rgba(129,140,248,.07);line-height:1;pointer-events:none}
+.ins-main{font-family:var(--serif);font-size:clamp(.95rem,2.2vw,1.15rem);color:var(--white);line-height:1.65;margin-bottom:.875rem;position:relative;z-index:1}
+.ins-list{display:flex;flex-direction:column;gap:.4rem}
+.ins-item{display:flex;align-items:flex-start;gap:.625rem;font-size:12px;color:var(--sub);line-height:1.55;padding:.5rem .75rem;border-radius:var(--r8);border:1px solid var(--rim)}
+.ins-dot{width:6px;height:6px;border-radius:50%;margin-top:.35rem;flex-shrink:0}
+.verdict{border-radius:var(--r20);padding:1.75rem;text-align:center;margin-bottom:1rem;border:1px solid}
+.vey{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:.625rem}
+.vtxt{font-family:var(--serif);font-size:clamp(1rem,2.2vw,1.25rem);line-height:1.5;margin-bottom:.625rem}
+.vnote{font-size:12px;color:var(--muted);line-height:1.6}
+
+/* ── TAB 2: CURVAS ── */
+/* nothing special needed */
+
+/* ── TAB 3: ÁREAS DE VIDA ── */
+.dom-grid{display:grid;grid-template-columns:1fr 1fr;gap:.875rem}
+.dom-card{background:var(--l2);border:1px solid var(--rim);border-radius:var(--r16);padding:1rem}
+.dom-hd{display:flex;align-items:center;gap:.5rem;margin-bottom:.25rem}
+.dom-ic{font-size:1.1rem}
+.dom-tt{font-size:13px;font-weight:600;color:var(--bright)}
+.dom-desc{font-size:11px;color:var(--muted);line-height:1.5;margin-bottom:.75rem}
+.dom-bars{display:flex;flex-direction:column;gap:.35rem}
+.db{display:flex;align-items:center;gap:.5rem}
+.dbh{font-family:var(--mono);font-size:10px;color:var(--muted);min-width:14px}
+.dbt{flex:1;height:6px;background:var(--l3);border-radius:3px;overflow:hidden}
+.dbf{height:100%;border-radius:3px;transition:width .55s cubic-bezier(.4,0,.2,1)}
+.dbv{font-family:var(--mono);font-size:10px;font-weight:500;min-width:26px;text-align:right}
+.dom-ref{font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:.5rem;display:flex;align-items:center;gap:.25rem}
+.dom-ref::before{content:'→';color:var(--acc);flex-shrink:0}
+
+/* ── TAB 4: BIENESTAR ── */
+.bw-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.125rem}
+.bw-col{text-align:center}
+.bw-ring{margin:0 auto .625rem;position:relative;width:80px;height:80px}
+.bw-ring canvas{position:absolute;inset:0;width:100%;height:100%}
+.bw-ring-val{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:1.2rem;font-weight:500}
+.bw-label{font-family:var(--serif);font-size:1rem;margin-bottom:3px}
+.bw-grade{font-family:var(--mono);font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;display:inline-block}
+.bw-breakdown{margin-top:.75rem;text-align:left}
+.bwb-row{display:flex;align-items:center;gap:.375rem;margin-bottom:3px}
+.bwb-lbl{font-size:10px;color:var(--muted);min-width:68px;flex-shrink:0}
+.bwb-bar{flex:1;height:3px;background:var(--l3);border-radius:2px;overflow:hidden}
+.bwb-fill{height:100%;border-radius:2px}
+.bwb-val{font-family:var(--mono);font-size:9px;color:var(--muted);min-width:20px;text-align:right}
+
+/* ── TAB 5: MARGINAL ── */
+/* nothing special */
+
+/* ── TAB 6: CIENCIA ── */
+.ref-list{display:flex;flex-direction:column;gap:.625rem}
+.ref{background:var(--l2);border:1px solid var(--rim);border-radius:var(--r12);padding:.875rem 1rem}
+.ref-hd{font-size:12.5px;font-weight:500;color:var(--bright);margin-bottom:.25rem;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.ref-yr{font-family:var(--mono);font-size:9px;color:var(--acc);background:rgba(129,140,248,.1);padding:1px 5px;border-radius:3px}
+.ref-wh{font-size:11.5px;color:var(--sub);line-height:1.5;margin-bottom:.25rem}
+.ref-us{font-size:11px;color:var(--muted);line-height:1.5;display:flex;align-items:flex-start;gap:.375rem}
+.ref-us::before{content:'→';color:var(--acc);flex-shrink:0;margin-top:1px}
+.ass-list{margin-top:1rem;display:flex;flex-direction:column;gap:.4rem}
+.ass{display:flex;align-items:flex-start;gap:.5rem;font-size:11.5px;color:var(--sub);line-height:1.55;padding:.5rem .75rem;background:rgba(245,158,11,.04);border:1px solid rgba(245,158,11,.1);border-radius:var(--r8)}
+.ast{font-family:var(--mono);font-size:9px;background:rgba(245,158,11,.15);color:#fcd34d;padding:2px 5px;border-radius:3px;white-space:nowrap;flex-shrink:0;margin-top:1px}
+.disclaim{margin-top:1rem;padding:.875rem 1rem;background:rgba(244,63,94,.04);border:1px solid rgba(244,63,94,.14);border-radius:var(--r12);font-size:11.5px;color:var(--sub);line-height:1.7}
+.disclaim strong{color:var(--text);font-weight:500}
+
+/* ── INPUTS PANEL ── */
+.inp-wrap{background:var(--l1);border:1px solid var(--rim);border-radius:var(--r20);padding:2rem;margin-bottom:1.5rem}
+.inp-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.375rem}
+.igl{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem;display:flex;align-items:center;gap:.375rem;flex-wrap:wrap}
+.opts{display:flex;flex-direction:column;gap:.25rem}
+.opt{display:flex;align-items:center;gap:.625rem;padding:.55rem .75rem;border-radius:var(--r8);border:1px solid var(--rim);background:transparent;color:var(--sub);font-family:var(--sans);font-size:13px;cursor:pointer;transition:all .12s;width:100%;text-align:left}
+.opt:hover{border-color:var(--rim2);color:var(--text);background:var(--l2)}
+.opt.on{border-color:var(--acc);background:rgba(129,140,248,.09);color:var(--white)}
+.opt.on .dot{background:var(--acc)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--l3);border:1px solid var(--rim2);flex-shrink:0;transition:background .15s}
+.opts{display:flex;flex-direction:column;gap:.25rem}
+.os{font-size:11px;color:var(--muted);margin-left:auto}
+.opt.on .os{color:rgba(129,140,248,.6)}
+.sim-btn{width:100%;margin-top:1.75rem;padding:.9rem;background:var(--acc);border:none;border-radius:var(--r12);color:white;font-family:var(--serif);font-size:1.05rem;font-style:italic;cursor:pointer;transition:all .2s}
+.sim-btn:hover{background:#6366f1;transform:translateY(-1px);box-shadow:0 8px 32px rgba(129,140,248,.3)}
+.sim-btn:active{transform:scale(.99)}
+.reset-link{display:inline-flex;align-items:center;gap:.375rem;font-size:12px;color:var(--muted);cursor:pointer;background:none;border:none;font-family:var(--sans);transition:color .15s;padding:0}
+.reset-link:hover{color:var(--acc)}
+
+/* ── SECTION IN TABS ── */
+.sey{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:.5rem;margin-bottom:.75rem}
+.sey::after{content:'';height:1px;background:var(--rim);flex:1}
+
+/* RESPONSIVE */
+@media(max-width:720px){
+  .score-boxes,.inp-grid,.metrics-grid,.dom-grid,.bw-grid{grid-template-columns:1fr}
+  .metrics-grid{grid-template-columns:1fr 1fr}
+  .legend-bar{gap:1rem}
+  .tab-content{padding:1.25rem 1rem}
+}
+@media(max-width:480px){
+  .metrics-grid{grid-template-columns:1fr}
+  .bw-grid{grid-template-columns:1fr 1fr}
+  .score-boxes{grid-template-columns:1fr}
+}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.ai{animation:fadeUp .3s ease both}
+</style>
+</head>
+<body>
+
+<!-- STARS -->
+<div class="sl" id="sl"></div>
+
+<!-- ═══ HERO ═══ -->
+<div class="hero">
+  <div class="hero-bg"></div>
+  <div class="he">Laboratorio del Sueño · Evidencia científica</div>
+  <h1 class="hh1">"Necesitas exactamente<br><em>8 horas</em> de sueño."</h1>
+  <p class="hsub">No exactamente. Pero probablemente tampoco eres inmune a dormir 6.<br><strong>Descubre tu zona real — no un número universal.</strong></p>
+  <button class="hcta" onclick="showSim()">Simular mi día →</button>
+</div>
+
+<!-- ═══ SIM SETUP (shown before running) ═══ -->
+<div id="setup-screen" style="display:none">
+  <div style="max-width:760px;margin:0 auto;padding:2rem 1.25rem">
+    <div style="font-family:var(--serif);font-size:1.6rem;color:var(--white);margin-bottom:.375rem">Tu perfil de sueño</div>
+    <div style="font-size:13px;color:var(--sub);margin-bottom:1.75rem;line-height:1.65">4 preguntas. Comparamos 6h, 7h y 8h ajustados a tu contexto — con bandas de incertidumbre y respaldo científico explícito.</div>
+    <div class="inp-wrap">
+      <div class="inp-grid">
+        <div>
+          <div class="igl">Cronotipo <span class="tag tev">Evidencia robusta</span></div>
+          <div class="opts" id="g-chrono">
+            <button class="opt on" data-g="chrono" data-v="morning" onclick="pick(this)"><div class="dot"></div>Madrugador<div class="os">Antes de las 7am</div></button>
+            <button class="opt" data-g="chrono" data-v="neutral" onclick="pick(this)"><div class="dot"></div>Intermedio<div class="os">7–9am</div></button>
+            <button class="opt" data-g="chrono" data-v="evening" onclick="pick(this)"><div class="dot"></div>Noctámbulo<div class="os">Después de las 9am</div></button>
+          </div>
+        </div>
+        <div>
+          <div class="igl">Calidad del sueño <span class="tag tev">Evidencia robusta</span></div>
+          <div class="opts" id="g-quality">
+            <button class="opt" data-g="quality" data-v="good" onclick="pick(this)"><div class="dot"></div>Buena<div class="os">Pocas interrupciones</div></button>
+            <button class="opt on" data-g="quality" data-v="medium" onclick="pick(this)"><div class="dot"></div>Media<div class="os">Algunas interrupciones</div></button>
+            <button class="opt" data-g="quality" data-v="poor" onclick="pick(this)"><div class="dot"></div>Mala<div class="os">Fragmentado, inquieto</div></button>
+          </div>
+        </div>
+        <div>
+          <div class="igl">Deuda acumulada <span class="tag tev">Evidencia robusta</span></div>
+          <div class="opts" id="g-debt">
+            <button class="opt" data-g="debt" data-v="none" onclick="pick(this)"><div class="dot"></div>Descansado<div class="os">Última semana: bien</div></button>
+            <button class="opt on" data-g="debt" data-v="mild" onclick="pick(this)"><div class="dot"></div>Déficit leve<div class="os">1–2h menos/noche</div></button>
+            <button class="opt" data-g="debt" data-v="heavy" onclick="pick(this)"><div class="dot"></div>Déficit severo<div class="os">3h+ menos/noche</div></button>
+          </div>
+        </div>
+        <div>
+          <div class="igl">Regularidad del horario <span class="tag tma">Supuesto del modelo</span></div>
+          <div class="opts" id="g-reg">
+            <button class="opt" data-g="reg" data-v="regular" onclick="pick(this)"><div class="dot"></div>Muy regular<div class="os">Mismo horario diario</div></button>
+            <button class="opt on" data-g="reg" data-v="moderate" onclick="pick(this)"><div class="dot"></div>Moderadamente regular<div class="os">±1–2h de variación</div></button>
+            <button class="opt" data-g="reg" data-v="chaotic" onclick="pick(this)"><div class="dot"></div>Caótico<div class="os">>2h de variación</div></button>
+          </div>
+        </div>
+      </div>
+      <button class="sim-btn" onclick="simulate()">Ver mi simulación →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ APP (shown after running) ═══ -->
+<div id="app">
+  <!-- APP HEADER -->
+  <div class="app-header">
+    <div class="app-header-inner">
+      <div class="app-brand">Lab del Sueño</div>
+      <button class="reset-link" onclick="resetSim()">← Cambiar perfil</button>
+    </div>
+  </div>
+
+  <!-- SCORE HEADER -->
+  <div class="score-header">
+    <div class="score-header-inner">
+      <!-- Legend explaining what the boxes mean -->
+      <div class="legend-bar">
+        <div class="lb-item"><div class="lb-swatch" style="background:#f43f5e"></div><strong style="color:#f43f5e">6h</strong> = escenario de 6 horas de sueño</div>
+        <div class="lb-item"><div class="lb-swatch" style="background:#f59e0b"></div><strong style="color:#f59e0b">7h</strong> = escenario de 7 horas de sueño</div>
+        <div class="lb-item"><div class="lb-swatch" style="background:#06b6d4"></div><strong style="color:#06b6d4">8h</strong> = escenario de 8 horas de sueño</div>
+        <div class="lb-item" style="padding-left:.75rem;border-left:1px solid var(--rim)">Score X/100 = índice de bienestar general ponderado · <span class="tag tma">supuesto del modelo</span></div>
+      </div>
+      <div class="score-boxes" id="score-boxes"></div>
+    </div>
+  </div>
+
+  <!-- TABS BAR -->
+  <div class="tabs-bar">
+    <div class="tabs-inner">
+      <button class="tab-btn on" onclick="switchTab('resumen')">Resumen</button>
+      <button class="tab-btn" onclick="switchTab('curvas')">Curvas de energía</button>
+      <button class="tab-btn" onclick="switchTab('areas')">Áreas de vida</button>
+      <button class="tab-btn" onclick="switchTab('bienestar')">Bienestar general</button>
+      <button class="tab-btn" onclick="switchTab('marginal')">Retornos marginales</button>
+      <button class="tab-btn" onclick="switchTab('ciencia')">Base científica</button>
+    </div>
+  </div>
+
+  <!-- TAB CONTENT -->
+  <div class="tab-content">
+
+    <!-- ── TAB: RESUMEN ── -->
+    <div class="tpanel on" id="tp-resumen">
+      <div class="sey">Métricas cognitivas</div>
+      <div class="metrics-grid ai" id="mgrid"></div>
+      <div class="insight-card ai" id="ins-card">
+        <div class="ins-main" id="ins-main">—</div>
+        <div class="ins-list" id="ins-list"></div>
+      </div>
+      <div class="verdict ai" id="verdict-card">
+        <div class="vey">Veredicto para tu perfil</div>
+        <div class="vtxt" id="vtxt">—</div>
+        <div class="vnote" id="vnote">—</div>
+      </div>
+    </div>
+
+    <!-- ── TAB: CURVAS ── -->
+    <div class="tpanel" id="tp-curvas">
+      <div class="card cp ai">
+        <div class="card-hd">
+          <div class="card-title">Curva de energía y alerta durante el día</div>
+          <div class="card-what"><strong>Qué muestra:</strong> Cómo evoluciona tu capacidad cognitiva hora a hora (6am–10pm) según las horas de sueño. La banda sombreada es la incertidumbre real entre personas (±1σ). Si las bandas se solapan, la diferencia no es universal — depende del individuo.</div>
+          <div class="card-tags"><span class="tag tev">Two-process model · Phillips et al. 2017</span><span class="tag tma">Interpolado de promedios poblacionales</span></div>
+        </div>
+        <canvas id="cEnergy" height="240"></canvas>
+        <div class="cleg" id="leg-energy"></div>
+      </div>
+      <div class="card cp ai">
+        <div class="card-hd">
+          <div class="card-title">Rendimiento acumulado a 5 días</div>
+          <div class="card-what"><strong>Qué muestra:</strong> Una sola noche no define tu semana. Aquí ves cómo se acumula (o deteriora) tu rendimiento si mantienes el patrón durante 5 días. La deuda crece más rápido que la somnolencia percibida: te sientes "manejable" cuando ya rindes bastante menos.</div>
+          <div class="card-tags"><span class="tag tev">Van Dongen et al. 2003/2017</span><span class="tag tma">Extrapolación lineal — trayectoria real es no-lineal</span></div>
+        </div>
+        <canvas id="cDebt" height="160"></canvas>
+        <div class="cleg" id="leg-debt"></div>
+      </div>
+      <div class="card cp ai">
+        <div class="card-hd">
+          <div class="card-title">Cómo te sientes vs cómo probablemente rindes</div>
+          <div class="card-what"><strong>Qué muestra:</strong> La brecha más importante del sueño. La barra sólida = <strong>cómo realmente rindes</strong> (objetivo). La barra translúcida detrás = <strong>cómo crees que rindes</strong> (subjetivo). La zona marcada como "ilusión" entre ambas barras es el punto ciego: lo que subestimas sobre tu propio deterioro. Con 6h y deuda acumulada, el cerebro pierde capacidad de detectar su propio declive — Van Dongen 2003 llamó esto "performance debt blindness".</div>
+          <div class="card-tags"><span class="tag tev">Van Dongen et al. 2003 · Psychosomatic Medicine</span></div>
+        </div>
+        <canvas id="cGap" height="200"></canvas>
+      </div>
+    </div>
+
+    <!-- ── TAB: ÁREAS ── -->
+    <div class="tpanel" id="tp-areas">
+      <div class="sey">Impacto en 8 áreas de tu vida — con fuente científica en cada una</div>
+      <div class="dom-grid ai" id="domgrid"></div>
+    </div>
+
+    <!-- ── TAB: BIENESTAR ── -->
+    <div class="tpanel" id="tp-bienestar">
+      <div class="card cp ai">
+        <div class="card-hd">
+          <div class="card-title">Índice de bienestar general ponderado</div>
+          <div class="card-what"><strong>Qué mide:</strong> Una composición de 8 dominios — cognitivo (20%), productividad (15%), estrés (15%), alimentación (15%), relaciones (10%), tolerancia social (10%), inmunidad (10%), cardiovascular (5%). Los pesos reflejan la magnitud de efecto relativa en meta-análisis publicados. <strong>No es una escala clínica validada</strong> — es un índice comparativo entre escenarios.</div>
+          <div class="card-tags"><span class="tag tma">Ponderaciones: supuesto del modelo basado en magnitudes de efecto relativas</span></div>
+        </div>
+        <div class="bw-grid" id="bwgrid"></div>
+      </div>
+    </div>
+
+    <!-- ── TAB: MARGINAL ── -->
+    <div class="tpanel" id="tp-marginal">
+      <div class="card cp ai">
+        <div class="card-hd">
+          <div class="card-title">Retornos marginales por hora de sueño</div>
+          <div class="card-what"><strong>Qué muestra:</strong> El beneficio de añadir una hora más de sueño no es constante — sigue una curva no-lineal. Las barras de fondo muestran el delta entre cada media hora adicional. Las zonas verdes son rendimiento creciente (cada hora extra vale más). Las zonas ámbar son rendimiento decreciente (el beneficio marginal se reduce). <strong>Clave:</strong> la transición 6→7h suele ser la más valiosa para la mayoría de adultos.</div>
+          <div class="card-tags"><span class="tag tev">Perlis et al. 2015 · Journal of Sleep Research</span><span class="tag tma">Curva de beneficio marginal — simplificación del modelo</span></div>
+        </div>
+        <canvas id="cMarginal" height="220"></canvas>
+        <div class="cleg" id="leg-marginal"></div>
+      </div>
+    </div>
+
+    <!-- ── TAB: CIENCIA ── -->
+    <div class="tpanel" id="tp-ciencia">
+      <div class="card cp ai">
+        <div style="font-size:13px;font-weight:600;color:var(--bright);margin-bottom:.25rem">Base de evidencia científica</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:1rem;line-height:1.65">Todas las referencias son de 2014 en adelante, con revisión por pares. Los hallazgos poblacionales no son predicciones individuales exactas.</div>
+        <div class="ref-list">
+          <div class="ref"><div class="ref-hd">AASM / Sleep Research Society — Consenso clínico <span class="ref-yr">2015</span></div><div class="ref-wh">Los adultos deben dormir 7+ horas de forma regular. &lt;7h crónicas asociadas con deterioro del rendimiento.</div><div class="ref-us">Base del umbral de 7h. <em>Sleep, 38(6), 843–844.</em></div></div>
+          <div class="ref"><div class="ref-hd">Chaput J-P et al. — National Sleep Foundation <span class="ref-yr">2018</span></div><div class="ref-wh">Revisión sistemática: 7–9h apropiado para adultos sanos. Calidad y regularidad importan junto con la duración.</div><div class="ref-us">Base curva de penalización a 6h. <em>Sleep Health, 4(2), 166–172.</em></div></div>
+          <div class="ref"><div class="ref-hd">Van Dongen et al. — "The Cumulative Cost of Wakefulness" <span class="ref-yr">2003 · replicado 2017</span></div><div class="ref-wh">6h/noche durante 2 semanas = déficits cognitivos equivalentes a privación total, pero autopercepción solo levemente afectada. La alerta subjetiva se desacopla del rendimiento objetivo.</div><div class="ref-us">Base de la visualización "sientes vs rindes". <em>Psychosomatic Medicine, 65(1).</em></div></div>
+          <div class="ref"><div class="ref-hd">Phillips et al. — SAFTE-FAST model <span class="ref-yr">2017</span></div><div class="ref-wh">Modelos biomatemáticos de alerta: presión de sueño (Proceso S) + ritmo circadiano (Proceso C). Nadir ~3–6am, dip secundario ~2–3pm.</div><div class="ref-us">Base de la forma de curva energía. <em>Sleep, 40(1).</em></div></div>
+          <div class="ref"><div class="ref-hd">St-Onge M-P et al. — Meta-análisis sueño y alimentación <span class="ref-yr">2016</span></div><div class="ref-wh">Restricción de sueño eleva grelina (hambre) y reduce leptina (saciedad), aumentando ingesta calórica especialmente de ultra-procesados.</div><div class="ref-us">Base dominio alimentación. <em>Advances in Nutrition, 7(5).</em></div></div>
+          <div class="ref"><div class="ref-hd">Hafner et al. — RAND Europe <span class="ref-yr">2016</span></div><div class="ref-wh">Un empleado con &lt;6h pierde ~6 días productivos/año vs 7–8h. Proyección en GDP de 5 países.</div><div class="ref-us">Base dominio productividad laboral. <em>RAND Research Reports.</em></div></div>
+          <div class="ref"><div class="ref-hd">Minkel et al. 2014 · Bernert et al. 2015</div><div class="ref-wh">Restricción de sueño amplifica la respuesta al estrés y los niveles de cortisol ante estresores leves.</div><div class="ref-us">Base dominio estrés. <em>Psychosomatic Medicine 2014; Sleep Medicine Reviews 2015.</em></div></div>
+          <div class="ref"><div class="ref-hd">Gordon & Chen 2014 · Troxel et al. 2017</div><div class="ref-wh">Mal sueño predice mayor conflicto en pareja al día siguiente. Satisfacción relacional y sueño se asocian bidireccionalmente.</div><div class="ref-us">Base dominio relaciones. <em>Soc. Psych. & Personality Science 2014; Sleep 2017.</em></div></div>
+          <div class="ref"><div class="ref-hd">Cote KA et al. — Tolerancia social <span class="ref-yr">2015</span></div><div class="ref-wh">Privación de sueño reduce tolerancia a comportamientos molestos y aumenta respuestas irritables o de evitación social.</div><div class="ref-us">Base dominio tolerancia social. <em>Sleep Medicine, 16(1).</em></div></div>
+          <div class="ref"><div class="ref-hd">Prather et al. — Carnegie Mellon <span class="ref-yr">2015</span></div><div class="ref-wh">&lt;6h → 4.2× más probabilidad de resfriarse. El efecto inmunológico más replicado del sueño.</div><div class="ref-us">Base dominio inmunidad. <em>Sleep, 38(9).</em></div></div>
+          <div class="ref"><div class="ref-hd">Grandner MA — Sleep, Health and Society <span class="ref-yr">2017</span></div><div class="ref-wh">Déficit crónico asociado con mayor riesgo cardiovascular, hipertensión y alteraciones metabólicas en estudios prospectivos.</div><div class="ref-us">Base dominio cardiovascular. <em>Sleep Medicine Clinics, 12(1).</em></div></div>
+          <div class="ref"><div class="ref-hd">Perlis M et al. — Dose-response <span class="ref-yr">2015</span></div><div class="ref-wh">Relación sueño-salud no lineal: mayor pendiente entre 5–7h que entre 7–9h.</div><div class="ref-us">Base curva de retornos marginales. <em>Journal of Sleep Research, 24(5).</em></div></div>
+          <div class="ref"><div class="ref-hd">Roenneberg et al. — Social jetlag <span class="ref-yr">2019</span></div><div class="ref-wh">El cronotipo modera cuándo ocurre el rendimiento pico. Tipos vespertinos con inicio temprano tienen mayor deterioro matutino.</div><div class="ref-us">Base ajuste por cronotipo. <em>Current Biology, 29(5).</em></div></div>
+          <div class="ref"><div class="ref-hd">Scullin & Bliwise — Sleep and Cognition <span class="ref-yr">2015</span></div><div class="ref-wh">Fragmentación y mala calidad predicen rendimiento cognitivo independientemente de la duración total.</div><div class="ref-us">Base multiplicador de calidad en todos los dominios. <em>Perspectives on Psychological Science, 10(1).</em></div></div>
+        </div>
+        <div class="ass-list">
+          <div style="font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.375rem">Supuestos del modelo</div>
+          <div class="ass"><span class="ast">Supuesto del modelo</span>El índice de energía (0–100) es compuesto interpolado. No es escala clínica validada.</div>
+          <div class="ass"><span class="ast">Supuesto del modelo</span>La regularidad: su efecto sobre la alerta diaria no tiene tamaño de efecto exacto establecido en la literatura.</div>
+          <div class="ass"><span class="ast">Supuesto del modelo</span>Deuda a 5 días extrapolada linealmente. Las trayectorias reales son no-lineales e individuales.</div>
+          <div class="ass"><span class="ast">Simplificación basada en evidencia</span>Brecha 6h vs 7h mayor que 7h vs 8h — coherente con tamaños de efecto publicados pero magnitudes son promedios.</div>
+        </div>
+        <div class="disclaim"><strong>No es consejo médico.</strong> Herramienta educativa. No diagnostica trastornos del sueño. Si sufres somnolencia excesiva crónica, insomnio o sueño no reparador, consulta a un médico o especialista en medicina del sueño.</div>
+      </div>
+    </div>
+
+  </div><!-- tab-content -->
+</div><!-- app -->
+
+<script>
+// ── STARS ──
+(function(){
+  const c=document.getElementById('sl');
+  for(let i=0;i<90;i++){
+    const s=document.createElement('div'),sz=Math.random()<.12?2:1;
+    s.className='star';
+    s.style.cssText=`width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--d:${2+Math.random()*4}s;--dl:${Math.random()*6}s;--o:${.15+Math.random()*.45}`;
+    c.appendChild(s);
+  }
+})();
+
+// ── STATE ──
+let P={chrono:'morning',quality:'medium',debt:'mild',reg:'moderate'};
+let activeTab='resumen';
+let lastC6,lastC7,lastC8;
+
+function showSim(){
+  document.querySelector('.hero').style.display='none';
+  document.getElementById('setup-screen').style.display='block';
+}
+function resetSim(){
+  document.getElementById('app').classList.remove('show');
+  document.getElementById('app').style.display='none';
+  document.getElementById('setup-screen').style.display='block';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function pick(b){
+  document.querySelectorAll(`[data-g="${b.dataset.g}"]`).forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');P[b.dataset.g]=b.dataset.v;
+}
+
+function switchTab(id){
+  activeTab=id;
+  document.querySelectorAll('.tab-btn').forEach(b=>{
+    b.classList.toggle('on',b.getAttribute('onclick').includes("'"+id+"'"));
+  });
+  document.querySelectorAll('.tpanel').forEach(p=>{
+    p.classList.toggle('on',p.id==='tp-'+id);
+  });
+  if(lastC6&&lastC7&&lastC8){
+    requestAnimationFrame(()=>{
+      if(id==='curvas'){drawEnergy(lastC6,lastC7,lastC8);drawDebt();drawGap(lastC6,lastC7,lastC8);}
+      if(id==='marginal'){drawMarginal();}
+    });
+  }
+}
+
+// ── MODEL ──
+const BASE={6:[50,55,59,63,66,68,65,62,56,58,61,63,60,55,50,44],7:[60,65,71,75,78,80,77,73,67,70,74,76,73,68,63,57],8:[69,75,80,84,86,87,85,82,76,79,83,85,82,77,72,67]};
+const HOURS=['6am','7am','8am','9am','10am','11am','12pm','1pm','2pm','3pm','4pm','5pm','6pm','7pm','8pm','9pm'];
+const QM={good:1.0,medium:.88,poor:.74};
+const DP={none:0,mild:6,heavy:16};
+const RB={regular:4,moderate:0,chaotic:-5};
+const CM={morning:[1,1,1,1],neutral:[.87,.93,.97,1],evening:[.73,.82,.90,.96]};
+const SIG={6:11,7:9,8:8};
+
+function curve(hrs){
+  return BASE[hrs].map((v,i)=>{
+    let a=v*QM[P.quality]-DP[P.debt]+RB[P.reg];
+    if(i<4)a*=CM[P.chrono][i];
+    return Math.max(5,Math.min(100,Math.round(a)));
+  });
+}
+function mets(c){
+  return{
+    morning:Math.round((c[0]+c[1]+c[2]+c[3])/4),
+    peak:Math.round((c[4]+c[5]+c[6])/3),
+    afternoon:Math.round((c[8]+c[9]+c[10])/3),
+    sustained:Math.round(c.reduce((a,b)=>a+b)/c.length)
+  };
+}
+
+function adj(v){
+  const qp=P.quality==='poor'?-10:P.quality==='medium'?-5:0;
+  const dp=P.debt==='heavy'?-12:P.debt==='mild'?-5:0;
+  const rb=P.reg==='chaotic'?-4:P.reg==='regular'?3:0;
+  return Math.max(10,Math.min(100,Math.round(v+qp+dp+rb)));
+}
+
+const DOMS=[
+  {ic:'🍽',t:'Alimentación',d:'Restricción de sueño eleva grelina (hambre) y reduce leptina (saciedad) — aumenta consumo de ultra-procesados.',ref:'St-Onge et al. 2016 · Advances in Nutrition',fn:h=>adj({6:48,7:70,8:82}[h])},
+  {ic:'💼',t:'Productividad laboral',d:'<7h → más errores, menor creatividad, reacción más lenta. Hafner 2016: &lt;6h = ~6 días productivos perdidos/año.',ref:'Hafner et al. 2016 · RAND Europe',fn:h=>adj({6:50,7:72,8:84}[h])},
+  {ic:'🧠',t:'Estrés percibido',d:'Privación amplifica la respuesta al estrés: cortisol más alto, menor regulación emocional, mayor reactividad cotidiana.',ref:'Minkel 2014 · Bernert 2015',fn:h=>adj({6:44,7:68,8:80}[h])},
+  {ic:'🤝',t:'Relaciones interpersonales',d:'Mal sueño predice mayor conflicto en pareja al día siguiente. Empatía y escucha se deterioran con déficit crónico.',ref:'Gordon & Chen 2014 · Troxel 2017',fn:h=>adj({6:48,7:70,8:80}[h])},
+  {ic:'🗣',t:'Tolerancia social',d:'Con menos sueño, tolerancia a comportamientos molestos cae y aumentan respuestas irritables o de evitación social.',ref:'Cote et al. 2015 · Sleep Medicine',fn:h=>adj({6:45,7:69,8:80}[h])},
+  {ic:'🛡',t:'Sistema inmune',d:'<6h → 4.2× más probabilidad de resfriarse (Prather 2015). Uno de los efectos del sueño más replicados en la literatura.',ref:'Prather et al. 2015 · Sleep 38(9)',fn:h=>adj({6:40,7:68,8:82}[h])},
+  {ic:'❤️',t:'Salud cardiovascular',d:'Déficit crónico asociado con mayor riesgo de hipertensión, inflamación y eventos cardiovasculares en estudios prospectivos.',ref:'Grandner 2017 · Sleep Med. Clinics',fn:h=>adj({6:52,7:72,8:83}[h])},
+  {ic:'🔋',t:'Resiliencia y recuperación',d:'Regularidad del horario potencia la calidad restauradora de cada hora. Un sueño irregular reduce la recuperación incluso con horas similares.',ref:'Roenneberg 2019 + Scullin 2015',fn:h=>adj({6:46,7:68,8:81}[h])},
+];
+const WEIGHTS={cog:.20,prod:.15,stress:.15,food:.15,relat:.10,social:.10,immune:.10,cardio:.05};
+function bienestar(hrs,c){
+  const d={cog:mets(c).sustained,prod:adj({6:50,7:72,8:84}[hrs]),stress:adj({6:44,7:68,8:80}[hrs]),food:adj({6:48,7:70,8:82}[hrs]),relat:adj({6:48,7:70,8:80}[hrs]),social:adj({6:45,7:69,8:80}[hrs]),immune:adj({6:40,7:68,8:82}[hrs]),cardio:adj({6:52,7:72,8:83}[hrs])};
+  return{score:Math.round(Object.entries(WEIGHTS).reduce((s,[k,w])=>s+d[k]*w,0)),d};
+}
+
+function grade(s){
+  if(s>=80)return{g:'Óptimo',col:'#10b981'};
+  if(s>=65)return{g:'Funcional',col:'#f59e0b'};
+  if(s>=50)return{g:'Subóptimo',col:'#f97316'};
+  return{g:'Deterioro probable',col:'#f43f5e'};
+}
+
+// Van Dongen 2003: "felt" scores decouple from actual performance under sleep debt.
+// With chronic restriction, subjects FEEL only mildly impaired while performing at near-
+// total-deprivation levels. We model this as an INDEPENDENT subjective score, not a
+// shifted version of the objective curve.
+// Key insight: 6h subjects feel ~68-75 (mild impairment perception) while actually at ~50-60.
+// 8h subjects: felt ≈ actual (no decouple). The gap WIDENS with more debt.
+function feltScore(hrs){
+  // Objective sustained score from the curve
+  const obj = mets(curve(hrs)).sustained;
+  // Debt amplifies the decouple: more debt = bigger overestimation of own state
+  const debtBoost = P.debt==='heavy' ? 18 : P.debt==='mild' ? 11 : 4;
+  // Hours effect: 6h sleep → bigger illusion of being fine than 8h
+  // At 8h with no debt, felt ≈ objective (no illusion needed)
+  const hrsBoost = hrs===6 ? 14 : hrs===7 ? 7 : 2;
+  // Quality: poor quality = slightly more aware something is wrong (smaller gap paradoxically)
+  const qualAdj = P.quality==='poor' ? -4 : 0;
+  const felt = Math.min(97, Math.max(obj+2, obj + debtBoost + hrsBoost + qualAdj));
+  return Math.round(felt);
+}
+function cumScore(hrs){
+  const s=mets(curve(hrs)).sustained;
+  const loss=hrs===6?3.8:hrs===7?1.4:0.3;
+  return Array.from({length:5},(_,d)=>Math.max(15,Math.round(s-loss*d)));
+}
+
+// ── CANVAS UTILS ──
+function setupC(id,h){
+  const el=document.getElementById(id);
+  const dpr=window.devicePixelRatio||1;
+  const w=el.offsetWidth;
+  el.width=w*dpr;el.height=h*dpr;
+  const ctx=el.getContext('2d');ctx.scale(dpr,dpr);
+  return{ctx,w,h};
+}
+function rgb(hex){return[parseInt(hex.slice(1,3),16),parseInt(hex.slice(3,5),16),parseInt(hex.slice(5,7),16)];}
+function grid(ctx,PAD,cw,ch,ys){
+  ctx.strokeStyle='rgba(255,255,255,.04)';ctx.lineWidth=1;
+  ys.forEach(y=>{
+    const py=PAD.t+ch-y/100*ch;
+    ctx.beginPath();ctx.moveTo(PAD.l,py);ctx.lineTo(PAD.l+cw,py);ctx.stroke();
+    ctx.fillStyle='rgba(90,100,120,.5)';ctx.font='9px monospace';ctx.textAlign='right';ctx.fillText(y,PAD.l-5,py+3.5);
+  });
+}
+
+// ── DRAW ENERGY ──
+function drawEnergy(c6,c7,c8){
+  const{ctx,w,h}=setupC('cEnergy',240);
+  const PAD={t:18,r:22,b:36,l:40},cw=w-PAD.l-PAD.r,ch=h-PAD.t-PAD.b,n=16;
+  grid(ctx,PAD,cw,ch,[25,50,75,100]);
+  HOURS.forEach((lbl,i)=>{if(i%3===0||i===n-1){ctx.fillStyle='rgba(90,100,120,.6)';ctx.font='9px sans-serif';ctx.textAlign='center';ctx.fillText(lbl,PAD.l+i/(n-1)*cw,PAD.t+ch+18);}});
+  [[c6,'#f43f5e',6],[c7,'#f59e0b',7],[c8,'#06b6d4',8]].forEach(([c,col])=>{
+    const pts=c.map((v,i)=>({x:PAD.l+i/(n-1)*cw,y:PAD.t+ch-v/100*ch}));
+    const sig=SIG[6];
+    const[r,g,b]=rgb(col);
+    ctx.beginPath();ctx.moveTo(pts[0].x,PAD.t+ch-(Math.min(100,c[0]+sig)/100*ch));
+    pts.forEach((p,i)=>ctx.lineTo(p.x,PAD.t+ch-(Math.min(100,c[i]+sig)/100*ch)));
+    pts.slice().reverse().forEach((p,i)=>ctx.lineTo(p.x,PAD.t+ch-(Math.max(0,c[n-1-i]-sig)/100*ch)));
+    ctx.closePath();ctx.fillStyle=`rgba(${r},${g},${b},.07)`;ctx.fill();
+    ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);pts.forEach(p=>ctx.lineTo(p.x,p.y));
+    ctx.strokeStyle=col;ctx.lineWidth=2.2;ctx.lineJoin='round';ctx.stroke();
+    [3,8,11].forEach(i=>{ctx.beginPath();ctx.arc(pts[i].x,pts[i].y,3.5,0,Math.PI*2);ctx.fillStyle=col;ctx.fill();ctx.strokeStyle='rgba(7,8,10,.9)';ctx.lineWidth=1.5;ctx.stroke();});
+  });
+  document.getElementById('leg-energy').innerHTML=[[6,'#f43f5e'],[7,'#f59e0b'],[8,'#06b6d4']].map(([h,col])=>`<div class="cli"><div class="cll" style="background:${col}"></div>${h}h — banda ±1σ de incertidumbre</div>`).join('');
+}
+
+// ── DRAW DEBT ──
+function drawDebt(){
+  const{ctx,w,h}=setupC('cDebt',160);
+  const PAD={t:14,r:22,b:28,l:40},cw=w-PAD.l-PAD.r,ch=h-PAD.t-PAD.b;
+  grid(ctx,PAD,cw,ch,[50,75,100]);
+  ['Día 1','Día 2','Día 3','Día 4','Día 5'].forEach((d,i)=>{ctx.fillStyle='rgba(90,100,120,.6)';ctx.font='9px sans-serif';ctx.textAlign='center';ctx.fillText(d,PAD.l+i/4*cw,PAD.t+ch+16);});
+  [[6,'#f43f5e'],[7,'#f59e0b'],[8,'#06b6d4']].forEach(([hrs,col],ci)=>{
+    const cum=cumScore(hrs);
+    const pts=cum.map((v,i)=>({x:PAD.l+i/4*cw,y:PAD.t+ch-v/100*ch}));
+    ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);pts.forEach(p=>ctx.lineTo(p.x,p.y));
+    ctx.strokeStyle=col;ctx.lineWidth=2;ctx.lineJoin='round';ctx.setLineDash(ci===0?[5,3]:[]);ctx.stroke();ctx.setLineDash([]);
+    pts.forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,3,0,Math.PI*2);ctx.fillStyle=col;ctx.fill();});
+  });
+  document.getElementById('leg-debt').innerHTML=[['#f43f5e','6h — probable declive acumulado'],['#f59e0b','7h — rendimiento mayormente sostenido'],['#06b6d4','8h — estable o mejora gradual']].map(([col,l])=>`<div class="cli"><div class="cll" style="background:${col}"></div>${l}</div>`).join('');
+}
+
+// ── DRAW GAP ──
+// This chart visualizes the Van Dongen 2003 finding: under chronic sleep restriction,
+// subjective alertness ratings decouple from objective performance.
+// The GAP between "lo que sientes" (felt) and "cómo rindes" (actual) is the key insight.
+// Larger gap = greater blind spot = more dangerous for decision-making.
+function drawGap(c6,c7,c8){
+  const{ctx,w,h}=setupC('cGap',200);
+  const PAD={t:16,l:120,r:90,b:16};
+  const cw=w-PAD.l-PAD.r,ch=h-PAD.t-PAD.b;
+
+  const scenarios=[
+    {hrs:6,col:'#f43f5e',actual:mets(c6).sustained,felt:feltScore(6)},
+    {hrs:7,col:'#f59e0b',actual:mets(c7).sustained,felt:feltScore(7)},
+    {hrs:8,col:'#06b6d4',actual:mets(c8).sustained,felt:feltScore(8)},
+  ];
+
+  const rowH=ch/3;
+  const barH=20;
+  const maxV=100;
+
+  scenarios.forEach((s,i)=>{
+    const y=PAD.t+i*rowH+rowH/2;
+    const actualW=s.actual/maxV*cw;
+    const feltW=s.felt/maxV*cw;
+    const[r,g,b]=rgb(s.col);
+
+    // Row label
+    ctx.fillStyle='rgba(176,189,212,.65)';
+    ctx.font='bold 10px sans-serif';ctx.textAlign='right';
+    ctx.fillText(s.hrs+'h',PAD.l-52,y+4);
+
+    // "Sientes" bar (translucent, behind)
+    ctx.fillStyle=`rgba(${r},${g},${b},.18)`;
+    ctx.beginPath();if(ctx.roundRect)ctx.roundRect(PAD.l,y-barH/2-1,feltW,barH+2,3);else ctx.rect(PAD.l,y-barH/2-1,feltW,barH+2);ctx.fill();
+    // Felt label
+    ctx.fillStyle=`rgba(${r},${g},${b},.55)`;ctx.font='9px monospace';ctx.textAlign='left';
+    ctx.fillText('Sientes: '+s.felt,PAD.l+feltW+6,y-3);
+
+    // "Rindes" bar (solid, in front)
+    ctx.fillStyle=s.col;
+    ctx.beginPath();if(ctx.roundRect)ctx.roundRect(PAD.l,y+1,actualW,barH-4,3);else ctx.rect(PAD.l,y+1,actualW,barH-4);ctx.fill();
+    // Actual label
+    ctx.fillStyle='rgba(240,245,252,.85)';ctx.font='bold 9px monospace';ctx.textAlign='left';
+    ctx.fillText('Rindes: '+s.actual,PAD.l+actualW+6,y+12);
+
+    // GAP arrow and annotation
+    const gap=s.felt-s.actual;
+    if(gap>4){
+      const gapX=PAD.l+actualW;
+      const gapW=feltW-actualW;
+      // Gap highlight
+      ctx.fillStyle=`rgba(${r},${g},${b},.08)`;
+      ctx.fillRect(gapX,y-barH/2-1,gapW,barH+2);
+      // Gap label
+      const gapCol=gap>=12?'#f43f5e':gap>=6?'#f59e0b':'#a3a3a3';
+      ctx.fillStyle=gapCol;ctx.font='bold 9px monospace';ctx.textAlign='center';
+      ctx.fillText('↔ +'+gap+' ilusión',gapX+gapW/2,y-barH/2-5);
+    }
+
+    // Divider
+    if(i<2){
+      ctx.strokeStyle='rgba(255,255,255,.05)';ctx.lineWidth=1;ctx.beginPath();
+      ctx.moveTo(PAD.l-45,PAD.t+(i+1)*rowH);ctx.lineTo(w-PAD.r+40,PAD.t+(i+1)*rowH);ctx.stroke();
+    }
+  });
+
+  // Legend
+  ctx.fillStyle='rgba(90,100,120,.6)';ctx.font='9px sans-serif';ctx.textAlign='right';
+  ctx.fillText('Sientes',PAD.l-6,PAD.t+8);
+  ctx.fillText('Rindes',PAD.l-6,PAD.t+20);
+}
+
+// ── DRAW MARGINAL ──
+function drawMarginal(){
+  const{ctx,w,h}=setupC('cMarginal',220);
+  const PAD={t:28,r:24,b:42,l:44},cw=w-PAD.l-PAD.r,ch=h-PAD.t-PAD.b;
+  const hrs=[4,4.5,5,5.5,6,6.5,7,7.5,8,8.5,9];
+  const pop=[22,30,40,47,55,64,74,82,87,89,88];
+  const minH=4,maxH=9;
+  grid(ctx,PAD,cw,ch,[0,25,50,75,100]);
+  hrs.forEach((hv,i)=>{
+    const px=PAD.l+(hv-minH)/(maxH-minH)*cw;
+    ctx.fillStyle='rgba(90,100,120,.6)';ctx.font='9px sans-serif';ctx.textAlign='center';ctx.fillText(hv+'h',px,PAD.t+ch+16);
+  });
+  // Differential bars
+  const diffs=pop.slice(1).map((v,i)=>v-pop[i]);
+  const maxD=Math.max(...diffs);
+  diffs.forEach((d,i)=>{
+    const hv=(hrs[i]+hrs[i+1])/2;
+    const px=PAD.l+(hv-minH)/(maxH-minH)*cw;
+    const bh=d/maxD*55;
+    ctx.fillStyle=d>7?'rgba(16,185,129,.2)':'rgba(245,158,11,.18)';
+    ctx.fillRect(px-12,PAD.t+ch-bh,24,bh);
+  });
+  // Inflection point highlight
+  const infX=PAD.l+(6.5-minH)/(maxH-minH)*cw;
+  ctx.fillStyle='rgba(255,255,255,.04)';ctx.fillRect(infX-16,PAD.t,32,ch);
+  ctx.strokeStyle='rgba(255,255,255,.12)';ctx.lineWidth=1;ctx.setLineDash([3,3]);
+  ctx.beginPath();ctx.moveTo(infX,PAD.t);ctx.lineTo(infX,PAD.t+ch);ctx.stroke();ctx.setLineDash([]);
+  // Curve
+  const pts=pop.map((v,i)=>({x:PAD.l+(hrs[i]-minH)/(maxH-minH)*cw,y:PAD.t+ch-v/100*ch}));
+  ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);pts.forEach(p=>ctx.lineTo(p.x,p.y));
+  ctx.strokeStyle='#a78bfa';ctx.lineWidth=2.5;ctx.lineJoin='round';ctx.stroke();
+  // Mark 6h, 7h, 8h
+  [[6,'#f43f5e'],[7,'#f59e0b'],[8,'#06b6d4']].forEach(([hv,col])=>{
+    const i=hrs.indexOf(hv);if(i<0)return;
+    const p=pts[i];
+    ctx.beginPath();ctx.arc(p.x,p.y,5.5,0,Math.PI*2);ctx.fillStyle=col;ctx.fill();
+    ctx.strokeStyle='rgba(7,8,10,.9)';ctx.lineWidth=2;ctx.stroke();
+    ctx.fillStyle=col;ctx.font='bold 9.5px sans-serif';ctx.textAlign='center';ctx.fillText(hv+'h',p.x,p.y-12);
+  });
+  // Labels
+  ctx.fillStyle='rgba(16,185,129,.75)';ctx.font='bold 9px sans-serif';ctx.textAlign='left';ctx.fillText('↑ Rdto. creciente',PAD.l+2,PAD.t+14);
+  ctx.fillStyle='rgba(245,158,11,.75)';ctx.textAlign='right';ctx.fillText('Rdto. decreciente ↓',PAD.l+cw-2,PAD.t+14);
+  document.getElementById('leg-marginal').innerHTML=`
+    <div class="cli"><div style="width:16px;height:10px;background:rgba(16,185,129,.2);border-radius:2px;flex-shrink:0"></div>Rendto. creciente — cada hora extra vale más que la anterior</div>
+    <div class="cli"><div style="width:16px;height:10px;background:rgba(245,158,11,.18);border-radius:2px;flex-shrink:0"></div>Rendto. decreciente — beneficio marginal se reduce</div>
+    <div class="cli"><div class="cll" style="background:#a78bfa"></div>Curva de bienestar poblacional (Perlis 2015)</div>`;
+}
+
+// ── DRAW RINGS ──
+function drawRing(id,score,col){
+  const el=document.getElementById(id);if(!el)return;
+  const dpr=window.devicePixelRatio||1;
+  el.width=80*dpr;el.height=80*dpr;
+  const ctx=el.getContext('2d');ctx.scale(dpr,dpr);
+  const cx=40,cy=40,r=30,lw=7;
+  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.strokeStyle='rgba(255,255,255,.07)';ctx.lineWidth=lw;ctx.stroke();
+  ctx.beginPath();ctx.arc(cx,cy,r,-Math.PI/2,-Math.PI/2+score/100*Math.PI*2);
+  ctx.strokeStyle=col;ctx.lineWidth=lw;ctx.lineCap='round';ctx.stroke();
+}
+
+// ── SIMULATE ──
+function simulate(){
+  document.getElementById('setup-screen').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('app').classList.add('show');
+  window.scrollTo({top:0,behavior:'instant'});
+
+  const c6=curve(6),c7=curve(7),c8=curve(8);
+  lastC6=c6;lastC7=c7;lastC8=c8;
+  const m6=mets(c6),m7=mets(c7),m8=mets(c8);
+  const b6=bienestar(6,c6),b7=bienestar(7,c7),b8=bienestar(8,c8);
+
+  // ── SCORE BOXES ──
+  document.getElementById('score-boxes').innerHTML=[[6,m6,b6,'var(--c6)','var(--c6t)','var(--c6b)'],[7,m7,b7,'var(--c7)','var(--c7t)','var(--c7b)'],[8,m8,b8,'var(--c8)','var(--c8t)','var(--c8b)']].map(([hrs,m,b,col,bg,border])=>{
+    const gr=grade(b.score);
+    return`<div class="sbox" style="background:${bg};border-color:${border}">
+      <div class="sbox-scenario">Escenario de <strong style="color:${col}">${hrs} horas</strong> de sueño por noche</div>
+      <div class="sbox-hrs-row">
+        <div class="sbox-hrs" style="color:${col}">${hrs}h</div>
+        <div class="sbox-hrs-lbl">horas de sueño<br>escenario simulado</div>
+      </div>
+      <div class="sbox-divider"></div>
+      <div class="sbox-score-row">
+        <div class="sbox-score-num" style="color:${col}">${b.score}</div>
+        <div class="sbox-score-denom">/100</div>
+      </div>
+      <div class="sbox-score-lbl">Índice de bienestar general ponderado<br><span style="font-size:10px;color:var(--muted)">(cognitivo 20% · productividad 15% · estrés 15% · alimentación 15% · relaciones 10% · social 10% · inmunidad 10% · cardio 5%)</span></div>
+      <div class="sbox-grade" style="background:${gr.col}20;color:${gr.col};border:1px solid ${gr.col}40">${gr.g}</div>
+      <div class="sbox-band">Alerta sostenida: ${m.sustained}/100 · rango ±${SIG[hrs]}</div>
+    </div>`;
+  }).join('');
+
+  // ── TAB RESUMEN: MÉTRICAS ──
+  const metDefs=[
+    {k:'morning',l:'Alerta matutina',d:'Primer tramo del día (6–9am). Muy afectado por cronotipo y deuda acumulada — los noctámbulos pagan más aquí.'},
+    {k:'peak',l:'Pico cognitivo',d:'Ventana de mayor foco (10am–1pm). Es cuando el cerebro opera en su mejor estado según el two-process model.'},
+    {k:'afternoon',l:'Foco post-mediodía',d:'Segmento 2–5pm. Incluye el dip circadiano de las 2–3pm — universal, pero más pronunciado con poco sueño.'},
+    {k:'sustained',l:'Energía promedio del día',d:'Media de todos los tramos. El indicador más representativo de cómo funcionarías a lo largo del día completo.'},
+  ];
+  document.getElementById('mgrid').innerHTML=metDefs.map(md=>`
+    <div class="mc">
+      <div class="mc-title">${md.l}</div>
+      <div class="mc-desc">${md.d}</div>
+      <div class="mc-bars">
+        ${[[m6,'#f43f5e',6],[m7,'#f59e0b',7],[m8,'#06b6d4',8]].map(([m,col,h])=>`
+          <div class="mb"><div class="mbh">${h}h</div>
+          <div class="mbt"><div class="mbf" style="width:${m[md.k]}%;background:${col}"></div></div>
+          <div class="mbv" style="color:${col}">${m[md.k]}</div></div>`).join('')}
+      </div>
+    </div>`).join('');
+
+  // ── INSIGHT ──
+  const s6=m6.sustained,s7=m7.sustained,s8=m8.sustained;
+  const g67=s7-s6,g78=s8-s7;
+  let insMain='';
+  if(g67>g78+4){
+    insMain=`Para tu perfil, el salto más importante es de 6h a 7h — no de 7h a 8h. Pasar de 6 a 7 horas añade aproximadamente <strong>${g67} puntos</strong> de rendimiento sostenido. El paso de 7→8h aporta <strong>${g78} puntos</strong> adicionales. Esa primera hora extra probablemente rinde más que perseguir la octava.`;
+  } else if(g67<5){
+    insMain=`En tu perfil actual, la diferencia entre 6h y 7h es relativamente pequeña — probablemente porque ${P.debt==='heavy'?'la deuda acumulada está deprimiendo todos los escenarios':'otros factores están dominando el modelo'}. El reto no es solo el número de horas.`;
+  } else {
+    insMain=`Más sueño tiende a ayudar en tu perfil — aunque los beneficios no son uniformes. Tu score a 7h es <strong>${s7}/100</strong>, a 8h <strong>${s8}/100</strong>. La diferencia es real pero no enorme para todo el mundo.`;
+  }
+  const bullets=[];
+  if(P.debt==='heavy')bullets.push({col:'#f43f5e',t:'<strong>Tu deuda acumulada está arrastrando todos los escenarios hacia abajo.</strong> Incluso 8h esta noche no compensa plenamente una semana en déficit. Van Dongen 2003/2017: la recuperación de restricción crónica requiere varias noches.'});
+  if(P.quality==='poor')bullets.push({col:'#f59e0b',t:'<strong>La mala calidad está penalizando tus curvas significativamente.</strong> 7h de buen sueño puede superar a 8h fragmentadas. Scullin & Bliwise 2015: los efectos de calidad son independientes de la duración.'});
+  if(P.chrono==='evening')bullets.push({col:'#818cf8',t:'<strong>Como noctámbulo, tus scores matutinos están penalizados independientemente de las horas.</strong> Roenneberg 2019: los tipos vespertinos con inicio temprano pierden rendimiento en horas de la mañana.'});
+  if(P.reg==='chaotic')bullets.push({col:'#f59e0b',t:'<strong>La irregularidad del horario reduce el beneficio de cualquier duración.</strong> La consistencia del ritmo circadiano importa tanto como las horas totales.'});
+  document.getElementById('ins-main').innerHTML=insMain;
+  document.getElementById('ins-list').innerHTML=bullets.map(b=>`<div class="ins-item"><div class="ins-dot" style="background:${b.col}"></div><div>${b.t}</div></div>`).join('');
+
+  // ── VERDICT ──
+  const vb6=b6.score,vb7=b7.score,vb8=b8.score;
+  let vTxt='',vNote='',vCol='',vBg='',vBord='';
+  if(P.debt==='heavy'&&P.quality==='poor'){
+    vTxt='"Ahora mismo, la duración no es la historia principal. Tu deuda y calidad son las variables que más pesan."';
+    vNote='Incluso el escenario de 8h está atenuado por tu perfil. Ataca primero la calidad y consistencia del horario.';
+    vCol='#f59e0b';vBg='rgba(245,158,11,.05)';vBord='rgba(245,158,11,.2)';
+  } else if(vb7-vb6>8){
+    vTxt='"Para tu perfil, el paso que más importa es 6 → 7h, no 7 → 8h."';
+    vNote=`La brecha de bienestar 6→7h en tu simulación es ${vb7-vb6} puntos. La brecha 7→8h es ${vb8-vb7} puntos. Un 7h consistente aparece más valioso que un 8h ocasional.`;
+    vCol='#06b6d4';vBg='rgba(6,182,212,.05)';vBord='rgba(6,182,212,.2)';
+  } else {
+    vTxt='"Más sueño probablemente ayuda — pero probablemente no necesitas exactamente 8 horas cada noche."';
+    vNote=`Tu simulación a 7h tiene un bienestar de ${vb7}/100. Esa puede ser tu zona funcional óptima, especialmente con horario consistente y buena calidad.`;
+    vCol='#818cf8';vBg='rgba(129,140,248,.05)';vBord='rgba(129,140,248,.2)';
+  }
+  const vc=document.getElementById('verdict-card');
+  vc.style.background=vBg;vc.style.borderColor=vBord;
+  document.getElementById('vtxt').style.color=vCol;
+  document.getElementById('vtxt').innerHTML=vTxt;
+  document.getElementById('vnote').textContent=vNote;
+
+  // ── DOMAINS ──
+  document.getElementById('domgrid').innerHTML=DOMS.map(dom=>`
+    <div class="dom-card">
+      <div class="dom-hd"><div class="dom-ic">${dom.ic}</div><div class="dom-tt">${dom.t}</div></div>
+      <div class="dom-desc">${dom.d}</div>
+      <div class="dom-bars">
+        ${[[6,'#f43f5e'],[7,'#f59e0b'],[8,'#06b6d4']].map(([h,col])=>{
+          const v=dom.fn(h);return`<div class="db"><div class="dbh">${h}h</div><div class="dbt"><div class="dbf" style="width:${v}%;background:${col}"></div></div><div class="dbv" style="color:${col}">${v}</div></div>`;
+        }).join('')}
+      </div>
+      <div class="dom-ref">${dom.ref}</div>
+    </div>`).join('');
+
+  // ── BIENESTAR RINGS ──
+  const BW_LBLS={cog:'Cognitivo',prod:'Productividad',stress:'Estrés',food:'Alimentación',relat:'Relaciones',social:'Social',immune:'Inmunidad',cardio:'Cardiovasc.'};
+  document.getElementById('bwgrid').innerHTML=[[6,b6,'#f43f5e'],[7,b7,'#f59e0b'],[8,b8,'#06b6d4']].map(([hrs,b,col])=>{
+    const gr=grade(b.score);
+    return`<div class="bw-col">
+      <div class="bw-ring"><canvas id="ring-${hrs}"></canvas><div class="bw-ring-val" style="color:${col}">${b.score}</div></div>
+      <div class="bw-label" style="color:${col}">${hrs} horas</div>
+      <div class="bw-grade" style="background:${gr.col}20;color:${gr.col};border:1px solid ${gr.col}40">${gr.g}</div>
+      <div class="bw-breakdown">
+        ${Object.entries(b.d).map(([k,v])=>`<div class="bwb-row"><div class="bwb-lbl">${BW_LBLS[k]||k}</div><div class="bwb-bar"><div class="bwb-fill" style="width:${v}%;background:${col};opacity:.7"></div></div><div class="bwb-val">${v}</div></div>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+  setTimeout(()=>{[[6,'#f43f5e'],[7,'#f59e0b'],[8,'#06b6d4']].forEach(([h,col])=>drawRing(`ring-${h}`,bienestar(h,curve(h)).score,col));},60);
+
+  // Draw initial tab (resumen has no canvas, draw curvas when switched)
+  switchTab('resumen');
+
+  // Handle resize
+  window.addEventListener('resize',()=>{
+    if(activeTab==='curvas'){drawEnergy(lastC6,lastC7,lastC8);drawDebt();drawGap(lastC6,lastC7,lastC8);}
+    if(activeTab==='marginal')drawMarginal();
+  });
+}
+</script>
+</body>
+</html>
